@@ -1,0 +1,110 @@
+[
+  {
+    "domain": ".x.com",
+    "expiry": 1775370699,
+    "httpOnly": true,
+    "name": "__cf_bm",
+    "path": "/",
+    "secure": true,
+    "value": "YjV0mxa.RlRGSkQVwaqBRT7BgOWH5bLdKR9EES0w9Ho-1775368899.8904982-1.0.1.1-AXBeJZQwFxjOk3CYEkOxAgmjKenBN4xd6nCZHpHKZpiF9ACuexoqP5XyRw0DxlMN9KKprtuADuLJ6DaqVrXqVJEed2llmAtZVVCzSs4cMCHjE0dqX8.6ZVKmPnh6WWW_"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1809928965,
+    "httpOnly": false,
+    "name": "__cuid",
+    "path": "/",
+    "secure": false,
+    "value": "169eba56de444c028019d50e8a2dbb0a"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1775455363,
+    "httpOnly": true,
+    "name": "att",
+    "path": "/",
+    "secure": true,
+    "value": "1-hWQcjRhbVlBQ9cGo5yRlcPwQcZgsMR78CCaQ81c8"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1809928963,
+    "httpOnly": true,
+    "name": "auth_token",
+    "path": "/",
+    "secure": true,
+    "value": "6be4e737c308215f43bcf2ba03e14494c753600b"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1809928963,
+    "httpOnly": false,
+    "name": "ct0",
+    "path": "/",
+    "secure": true,
+    "value": "e1710c3b8139ce0a6384b876b589bbc8be907d83463b36e3cd976c80cc3a84ee491a34c79d753adf98eb096eee636b38da06ee48b28de1bc624ed75f9eb04008ed41a85657238391a7ffe7656cb368ff"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1775973729,
+    "httpOnly": false,
+    "name": "external_referer",
+    "path": "/",
+    "secure": true,
+    "value": "padhuUp37zjgzgv1mFWxJ12Ozwit7owX|0|8e8t2xd8A2w%3D"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1775377924,
+    "httpOnly": false,
+    "name": "gt",
+    "path": "/",
+    "secure": true,
+    "value": "2040671294333595863"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1809583298,
+    "httpOnly": false,
+    "name": "guest_id",
+    "path": "/",
+    "secure": true,
+    "value": "v1%3A177536889927449304"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1809928966,
+    "httpOnly": false,
+    "name": "guest_id_ads",
+    "path": "/",
+    "secure": true,
+    "value": "v1%3A177536889927449304"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1809928966,
+    "httpOnly": false,
+    "name": "guest_id_marketing",
+    "path": "/",
+    "secure": true,
+    "value": "v1%3A177536889927449304"
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1809928924,
+    "httpOnly": false,
+    "name": "personalization_id",
+    "path": "/",
+    "secure": true,
+    "value": "\"v1_WhhF3z8Srk9TEwDrYCqZUA==\""
+  },
+  {
+    "domain": ".x.com",
+    "expiry": 1806904966,
+    "httpOnly": false,
+    "name": "twid",
+    "path": "/",
+    "secure": true,
+    "value": "u%3D267806677"
+  }
+]

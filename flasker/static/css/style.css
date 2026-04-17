@@ -1,0 +1,295 @@
+/* ============================
+   ■ 背景・全体設定
+============================ */
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  color: white;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #5A2E3F, #3A1E2A, #1A0E12);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+main, .scroll-container {
+  background: transparent !important;
+}
+
+/* ============================
+   ■ 斜めライン（背景装飾）
+============================ */
+.line-w1, .line-red, .line-w3, .line-w4, .line-yellow, .line-w6 {
+  position: absolute;
+  pointer-events: none;
+  z-index: 9999;
+  right: -10px;
+  width: 1000px;
+  transform: rotate(45deg);
+  transform-origin: right top;
+}
+
+.line-w1 { top: 119px; height: 1px; background: #ffffff; }
+.line-red { top: 120px; height: 6px; background: #8A0F1A; }
+.line-w3 { top: 127px; height: 1px; background: #ffffff; }
+.line-w4 { top: 179px; height: 1px; background: #ffffff; }
+.line-yellow { top: 180px; height: 6px; background: #D9B64A; }
+.line-w6 { top: 187px; height: 1px; background: #ffffff; }
+
+/* ============================
+   ■ 見出し・リンク
+============================ */
+h1 { margin-bottom: 20px; }
+
+/* ▼ 親はレイアウト用（名前変更済み） */
+.link-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* ▼ ボタンの見た目は a.link-button に統一 */
+a.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #000;
+  background: #fff;
+
+  /* 透明ボーダーで形が変わらない */
+  border: 2px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+a.link-button:hover {
+  transform: translateY(-3px);
+  border-color: #92F3A4;
+  box-shadow:
+    0 -2px 8px #92F3A4,
+    0 0 5px #92F3A4,
+    inset 0 0 5px #92F3A4;
+}
+
+/* ここ好きボタンを前面に出す */
+.kokosuki-fix {
+  position: relative;
+  z-index: 50;
+}
+
+/* ============================
+   ■ 週スケジュール
+============================ */
+.week-scroll-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.week-btn {
+  background: #2aa775;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  margin: 0 5px;
+}
+
+.week-btn:hover {
+  background: #1f8a60;
+}
+
+.week-list {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding: 10px 0;
+  width: 100%;
+  scrollbar-width: none;
+}
+
+.week-list::-webkit-scrollbar { display: none; }
+
+.week-item {
+  min-width: 140px;
+  scroll-snap-align: start;
+}
+
+.day-card {
+  min-width: 140px;
+  background: white;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #000;
+}
+
+/* ============================
+   ■ スケジュール入力
+============================ */
+.schedule-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.week-calendar {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+}
+
+.day-column {
+  min-width: 150px;
+  padding: 10px;
+  background: #f4f4f4;
+  border-radius: 8px;
+}
+
+.schedule-card {
+  width: 240px;
+  min-width: 240px;
+  background: white;
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border-left: 4px solid #4caf50;
+  font-size: 14px;
+  color: #000;
+}
+
+.schedule-thumb {
+  width: 240px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+.schedule-thumb:hover {
+  box-shadow:
+    0 -2px 8px #92F3A4,
+    0 0 5px #92F3A4,
+    inset 0 0 5px #92F3A4;
+}
+
+.schedule-time {
+  font-size: 24px;
+  font-weight: 800;
+  color: #4caf50;
+  text-shadow: 0 0 6px rgba(76,175,80,0.6);
+  padding: 4px 8px;
+  background: rgba(76,175,80,0.12);
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.delete-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-btn:hover {
+  background: #e05555;
+}
+
+/* ============================
+   ■ YouTube 最新動画
+============================ */
+.scroll-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.scroll-btn {
+  background: #2aa775;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  margin: 0 5px;
+}
+
+.scroll-btn:hover {
+  background: #1f8a60;
+}
+
+.video-list {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding: 10px 0;
+  scrollbar-width: none;
+}
+
+.video-list::-webkit-scrollbar { display: none; }
+
+.video-link {
+  display: block;
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: inherit;
+}
+
+.video-card {
+  width: 240px;
+  min-width: 240px;
+  background: white;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: transform 0.2s, box-shadow 0.1s ease;
+  color: #000;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 -2px 8px #92F3A4,
+    0 0 5px #92F3A4,
+    inset 0 0 5px #92F3A4;
+}
+
+.thumb {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* ============================
+   ■ デバッグ
+============================ */
+#mouse-debug {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+  z-index: 99999;
+  pointer-events: none;
+  user-select: none;
+}

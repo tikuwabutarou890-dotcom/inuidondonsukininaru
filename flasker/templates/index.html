@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>いぬいどんどんすきになる</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+<div class="line-w1"></div>
+<div class="line-red"></div>
+<div class="line-w3"></div>
+<div class="line-w4"></div>
+<div class="line-yellow"></div>
+<div class="line-w6"></div>
+
+<h1>いぬいどんどんすきになる</h1>
+
+<!-- ▼ グッズ・リンク集 -->
+<div class="link-buttons">
+  <a href="https://twitter.com/inui_toko" target="_blank" class="link-button">Twitter</a>
+  <a href="https://www.youtube.com/channel/UCXRlIK3Cw_TJIQC5kSJJQMg" target="_blank" class="link-button">YouTube</a>
+  <a href="https://shop.nijisanji.jp/1070" target="_blank" class="link-button">公式ストア</a>
+  <a href="https://marshmallow-qa.com/inui_toko" target="_blank" class="link-button">マシュマロ</a>
+  <a href="https://wikiwiki.jp/nijisanji/戌亥とこ" target="_blank" class="link-button">Wiki</a>
+</div>
+
+
+
+
+<h1>あなたは {{ count }} 人目の訪問者です</h1>
+
+<!-- ▼ 戌亥ここ好きボタン -->
+<div class="kokosuki-fix" style="text-align: left; margin: 20px 0;">
+    <a href="{{ url_for('main.kokosuki') }}" class="link-button">戌亥ここ好き</a>
+</div>
+
+
+
+
+
+<!-- ▼ 週スケジュール -->
+<h2>今週のスケジュール</h2>
+
+<div class="week-scroll-container">
+    <button class="week-btn week-left">‹</button>
+
+    <div class="week-list" id="weekList">
+        <!-- JS で日付を入れるので最初は空でOK -->
+    </div>
+
+    <button class="week-btn week-right">›</button>
+</div>
+
+<div class="schedule-input">
+  <input type="date" id="dateInput">
+  <input type="time" id="timeInput">
+  <input type="url" id="urlInput" placeholder="URLを入力">
+  <button onclick="addSchedule()">追加</button>
+</div>
+
+<div id="calendar" class="week-calendar"></div>
+
+
+<!-- ▼ YouTube 最新動画 -->
+<h2>YouTube 最新動画</h2>
+
+<div class="scroll-container">
+    <button class="scroll-btn" onclick="scrollVideos(-1)">‹</button>
+
+    <div class="video-list">
+        {% for video in videos %}
+            <a class="video-link" href="https://www.youtube.com/watch?v={{ video.videoId }}" target="_blank">
+                <div class="video-card">
+                    <img class="thumb" src="{{ video.thumbnail }}" alt="">
+                    <p>{{ video.title }}</p>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+
+<script>
+function scrollVideos(dir) {
+    const list = document.querySelector(".video-list");
+    list.scrollLeft += dir * 300;
+}
+</script>
+
+<button class="scroll-btn" onclick="scrollVideos(1)">›</button>
+
+
+<!-- ★★★ 管理者フラグを JS に渡す（必ず script.js より前） ★★★ -->
+<script>
+const IS_ADMIN = {{ 'true' if session.get('admin') else 'false' }};
+</script>
+
+<!-- ★★★ スケジュール・YouTube処理のメインJS ★★★ -->
+<script src="/static/js/script.js"></script>
+
+<!-- デバック用 -->
+<div id="mouse-debug"></div>
+
+{% if session.get('admin') %}
+    <img src="/static/img/login_toy.png" alt="管理者" style="width:120px;">
+{% endif %}
+
+
+</body>
+</html>
