@@ -16,3 +16,5 @@ def create_app():
 
     return app
 
+# ★★★ これが絶対に必要 ★★★
+app = create_app()
