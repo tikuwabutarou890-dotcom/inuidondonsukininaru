@@ -122,8 +122,9 @@ def is_admin():
 #   アクセス解析
 # ============================
 import logging
-from flask import request
+from flask import request, current_app
 
-@app.before_request
+@bp.before_app_request
 def log_request_info():
-    app.logger.info(f"{request.remote_addr} {request.method} {request.path}")
+    current_app.logger.info(f"{request.remote_addr} {request.method} {request.path}")
+
