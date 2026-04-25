@@ -16,25 +16,27 @@ function extractYouTubeId(url) {
     }
 }
 
-// ▼ Flask API でタイトル取得
-async function fetchYouTubeTitle(videoId) {
-    try {
-        const res = await fetch(`/api/title?id=${videoId}`);
-        const data = await res.json();
-        return data.title || "タイトル取得失敗";
-    } catch {
-        return "タイトル取得失敗";
-    }
-}
+// ===============================
+// ▼ DBから読み込み
+// ===============================
+let schedules = {};
 
+async function loadSchedules() {
+    const res = await fetch("/api/schedule/list");
+    schedules = await res.json();
+}
 
 // ===============================
 // ▼ weekList（月曜始まり）
 // ===============================
-let schedules = JSON.parse(localStorage.getItem("schedules") || "{}");
-
-// ▼ 今が基準。-1 = 先週、1 = 来週
 let weekOffset = 0;
+
+function formatDateJST(date) {
+    const y = date.getFullYear();
+    const m = ("0" + (date.getMonth() + 1)).slice(-2);
+    const d = ("0" + date.getDate()).slice(-2);
+    return `${y}-${m}-${d}`;
+}
 
 function renderWeekList() {
     const weekList = document.getElementById("weekList");
@@ -42,18 +44,15 @@ function renderWeekList() {
 
     const today = new Date();
 
-    // ▼ 今週の月曜日
     const monday = new Date(today);
     monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-
-    // ▼ 週オフセットを反映
     monday.setDate(monday.getDate() + weekOffset * 7);
 
     for (let i = 0; i < 7; i++) {
         const d = new Date(monday);
         d.setDate(monday.getDate() + i);
 
-        const dateKey = d.toISOString().split("T")[0];
+        const dateKey = formatDateJST(d);
 
         const card = document.createElement("div");
         card.className = "day-card";
@@ -68,9 +67,8 @@ function renderWeekList() {
     }
 }
 
-
 // ===============================
-// ▼ 1日のスケジュール描画（管理者だけ削除ボタン）
+// ▼ 1日のスケジュール描画（削除100%安定版）
 // ===============================
 function renderDaySchedules(dateKey) {
     const container = document.getElementById(`day-${dateKey}`);
@@ -80,131 +78,152 @@ function renderDaySchedules(dateKey) {
 
     if (!schedules[dateKey]) return;
 
-    schedules[dateKey].forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "schedule-card";
+    schedules[dateKey].forEach(item => {
+        const wrapper = document.createElement("div");
 
-        const isYouTube = item.thumbnail !== null;
+    wrapper.innerHTML = `
+    <div class="schedule-card">
 
-        // ▼ 管理者だけ削除ボタンを表示
-        let deleteButtonHtml = "";
-        if (IS_ADMIN) {
-            deleteButtonHtml = `
-                <button class="delete-btn" onclick="deleteSchedule('${dateKey}', ${index})">×</button>
-            `;
-        }
-
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong class="schedule-time">${item.time}</strong>
-                ${deleteButtonHtml}
-            </div>
+        <!-- ▼ 左側（リンク部分：ホバー対象） -->
+        <a href="${item.url}" target="_blank" class="schedule-main">
+            <div class="schedule-time">${item.time}</div>
 
             ${
-                isYouTube
-                    ? `
-                    <a href="${item.url}" target="_blank">
-                        <img src="${item.thumbnail}" class="schedule-thumb">
-                    </a>
-                    `
+                item.thumbnail
+                    ? `<img src="${item.thumbnail}" class="schedule-thumb">`
                     : ""
             }
 
-            <div style="margin-top:6px;">
-                ${item.title ? `<div>${item.title}</div>` : ""}
-                ${!isYouTube ? `<a href="${item.url}" target="_blank">${item.url}</a>` : ""}
-            </div>
-        `;
+            ${
+                item.title
+                    ? `<div class="schedule-title">${item.title}</div>`
+                    : ""
+            }
+        </a>
 
-        container.appendChild(div);
+        <!-- ▼ 右側（削除ボタン） -->
+        ${
+            IS_ADMIN
+                ? `<button class="side-delete" data-id="${item.id}">×</button>`
+                : ""
+        }
+
+    </div>
+`;
+
+
+        container.appendChild(wrapper);
+
+        // ▼ 削除ボタンのクリックを確実にリンクから分離
+        if (IS_ADMIN) {
+            const btn = wrapper.querySelector(".side-delete");
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();   // ← リンクに吸われない（決定打）
+                deleteSchedule(item.id);
+            });
+        }
     });
 }
-
 
 // ===============================
 // ▼ スケジュール追加
 // ===============================
 async function addSchedule() {
-    const date = document.getElementById("dateInput").value;
-    const time = document.getElementById("timeInput").value;
-    const url = document.getElementById("urlInput").value;
-
-    if (!date || !time || !url) {
-        alert("日付・時間・URLを入力してください");
+    if (!IS_ADMIN) {
+        alert("スケジュールの追加は管理者のみです");
         return;
     }
 
-    const videoId = extractYouTubeId(url);
+    const date = document.getElementById("dateInput").value;
+    const time = document.getElementById("timeInput").value;
+    const url = document.getElementById("urlInput").value.trim();
+
+    if (!date || !time || !url) {
+        alert("日付・時間・URL を入力してください");
+        return;
+    }
+
+    let videoId = extractYouTubeId(url);
     let thumbnail = null;
     let title = null;
 
+    try {
+        const res = await fetch(`https://noembed.com/embed?url=${url}`);
+        const data = await res.json();
+
+        if (data.video_id) videoId = data.video_id;
+        if (data.title) title = data.title;
+    } catch {}
+
     if (videoId) {
-        thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-        title = await fetchYouTubeTitle(videoId);
+        thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
     }
 
-    if (!schedules[date]) schedules[date] = [];
+    const payload = { date, time, url, title, thumbnail };
 
-    schedules[date].unshift({
-        time,
-        url,
-        thumbnail,
-        title
+    const res = await fetch("/api/schedule/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
     });
 
-    localStorage.setItem("schedules", JSON.stringify(schedules));
+    const result = await res.json();
 
-    renderDaySchedules(date);
-
-    document.getElementById("urlInput").value = "";
+    if (result.status === "ok") {
+        await loadSchedules();
+        renderWeekList();
+    } else {
+        alert("追加に失敗しました（管理者のみ）");
+    }
 }
 
+// ===============================
+// ▼ 削除（POST /api/schedule/delete）
+// ===============================
+async function deleteSchedule(id) {
+    const res = await fetch("/api/schedule/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+    });
+
+    if (res.status === 403) {
+        alert("管理者だけ削除できます");
+        return;
+    }
+
+    await loadSchedules();
+    renderWeekList();
+}
 
 // ===============================
-// ▼ 初期表示 + 週送りボタン
+// ▼ 初期表示
 // ===============================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadSchedules();
     renderWeekList();
 
-    const weekLeft = document.querySelector(".week-left");
-    const weekRight = document.querySelector(".week-right");
-
-    // ▼ 先週へ
-    weekLeft.addEventListener("click", () => {
+    document.querySelector(".week-left").addEventListener("click", async () => {
         weekOffset -= 1;
+        await loadSchedules();
         renderWeekList();
     });
 
-    // ▼ 来週へ
-    weekRight.addEventListener("click", () => {
+    document.querySelector(".week-right").addEventListener("click", async () => {
         weekOffset += 1;
+        await loadSchedules();
         renderWeekList();
     });
 });
 
-
-// ===============================
-// ▼ スケジュール削除
-// ===============================
-function deleteSchedule(dateKey, index) {
-    if (!schedules[dateKey]) return;
-
-    schedules[dateKey].splice(index, 1);
-
-    if (schedules[dateKey].length === 0) {
-        delete schedules[dateKey];
-    }
-
-    localStorage.setItem("schedules", JSON.stringify(schedules));
-
-    renderDaySchedules(dateKey);
-}
-
-
-// ===============================
-// ▼ デバッグ
-// ===============================
+// ===== マウスカーソル位置デバッグ =====
 document.addEventListener("mousemove", (e) => {
-    const debug = document.getElementById("mouse-debug");
-    debug.textContent = `x: ${e.clientX}, y: ${e.clientY}, h: ${e.pageY}`;
+    const box = document.getElementById("mouse-debug");
+    if (!box) return; // admin じゃないときは何もしない
+
+    const x = e.clientX;
+    const y = e.clientY;
+    const h = window.scrollY + e.clientY;
+
+    box.textContent = `x:${x} y:${y} h:${h}`;
 });

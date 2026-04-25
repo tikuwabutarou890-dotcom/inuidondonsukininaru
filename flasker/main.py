@@ -4,9 +4,9 @@ import requests
 import os
 
 bp = Blueprint("main", __name__)
-bp.secret_key = "super_secret_key_123"  # 好きに変えてOK
 
-ADMIN_PASSWORD = "inui123"  # 好きに変えてOK
+
+
 
 
 # ============================
@@ -38,7 +38,13 @@ def index():
     write_counter(count)
 
     videos = fetch_latest_videos(10)
-    return render_template("index.html", videos=videos, count=count)
+    return render_template(
+        "index.html",
+        videos=videos,
+        count=count,
+        debug=is_admin()   # ← 追加
+    )
+
 
 
 # ============================
@@ -70,6 +76,16 @@ def kokosuki():
 
 
 # ============================
+#   コラボページ
+# ============================
+@bp.route("/collab")
+def collab():
+    is_admin = session.get("admin", False)
+    return render_template("collab.html", IS_ADMIN=is_admin)
+
+
+
+# ============================
 #   ログイン (.env 対応)
 # ============================
 @bp.route("/login", methods=["GET", "POST"])
@@ -95,3 +111,9 @@ def login():
 def logout():
     session.pop("admin", None)
     return redirect(url_for("main.index"))
+
+# ============================
+#   デバックモード
+# ============================
+def is_admin():
+    return session.get("admin") is True

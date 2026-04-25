@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>戌亥とこ コラボ一覧</title>
+
+<link rel="stylesheet" href="/static/css/style.css">
+
+<style>
+/* ▼ コラボ全体の幅をここすきと完全統一（1000px） */
+.collab-container {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ▼ タイトル（ここすきと同じゴールド仕様） */
+.collab-title {
+    max-width: 1000px;
+    margin: 0 auto 25px;
+    font-size: 40px;
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: 2px;
+    color: #FFD84C;
+    text-shadow: 0 0 10px rgba(255,216,76,0.5);
+}
+
+/* ▼ 説明文（ここすきと同じ位置・同じ幅） */
+.collab-text {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+/* ▼ 入力フォームも幅1000pxに統一 */
+.input-area {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* コメント欄を長く、追加ボタンを短く */
+.input-area input {
+    flex: 4;
+}
+
+.input-area .btn {
+    flex: 1;
+    max-width: 120px;
+}
+
+/* ▼ カード一覧も幅1000pxに統一 */
+#collabList {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ====== コラボカード（ここすきと完全一致） ====== */
+.collab-card {
+    max-width: 1000px;
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 15px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.collab-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.collab-thumb {
+    width: 180px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.collab-info {
+    flex: 1;
+}
+
+.collab-info b {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.collab-info p {
+    margin: 4px 0;
+    opacity: 0.8;
+}
+
+/* 削除ボタン（ここすきと完全一致） */
+.btn-danger {
+    border: 2px solid #ff4c4c;
+    background: transparent;
+    color: #ff4c4c;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-danger:hover {
+    background: #ff4c4c;
+    color: #fff;
+    box-shadow: 0 0 10px #ff4c4c;
+}
+
+/* ▼ モーダル背景（黒半透明） */
+.modal {
+    display: none; /* 最初は非表示 */
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+}
+
+/* ▼ モーダル内の画像（大きめ） */
+.modal-content {
+    max-width: 80%;
+    max-height: 80%;
+    border-radius: 12px;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ▼ ×ボタン */
+.close-btn {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    text-shadow: 0 0 10px black;
+}
+
+/* ▼ フェードイン */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+<div class="line-w1"></div>
+<div class="line-red"></div>
+<div class="line-w3"></div>
+<div class="line-w4"></div>
+<div class="line-yellow"></div>
+<div class="line-w6"></div>
+
+<script>
+    const IS_ADMIN = {{ IS_ADMIN | tojson }};
+</script>
+
+<div class="collab-container">
+
+    <div class="collab-title">戌亥とこのコラボ一覧</div>
+
+    <p class="collab-text" onclick="showCollabImage()">
+        戌亥とこが参加したコラボ配信をまとめて記録できます。YouTube URL を入力すると自動でサムネイルとタイトルを取得します。<br>
+        追加すると一番上に出ます。ダブったものは古いのが消えます。<br>
+    </p>
+<div id="collabImageArea"></div>
+
+
+    <div class="input-area">
+        <input id="collabUrl" type="text" placeholder="YouTube の URL を入力">
+        <button class="btn" onclick="addCollab()">追加</button>
+    </div>
+
+    <h3 style="max-width:1000px;margin:20px auto 10px;">追加されたコラボ一覧</h3>
+    <div id="collabList"></div>
+
+</div>
+
+
+<script>
+/* ====== 追加処理 ====== */
+function addCollab() {
+    const url = document.getElementById("collabUrl").value.trim();
+    if (!url) return;
+
+    fetch(`https://noembed.com/embed?url=${url}`)
+        .then(res => res.json())
+        .then(data => {
+            const collab = {
+                url: url,
+                title: data.title,
+                author: data.author_name,
+                thumbnail: data.thumbnail_url
+            };
+
+            saveCollab(collab);
+            renderCollabs();
+            document.getElementById("collabUrl").value = "";
+        });
+}
+
+/* ====== 保存（重複は古い方を削除） ====== */
+function saveCollab(collab) {
+    let list = JSON.parse(localStorage.getItem("collabs") || "[]");
+
+    list = list.filter(item => item.url !== collab.url);
+    list.push(collab);
+
+    localStorage.setItem("collabs", JSON.stringify(list));
+}
+
+/* ====== 表示（新しい順） ====== */
+function renderCollabs() {
+    let list = JSON.parse(localStorage.getItem("collabs") || "[]");
+    list = list.reverse();
+
+    const container = document.getElementById("collabList");
+    container.innerHTML = "";
+
+    list.forEach((c, index) => {
+        const card = document.createElement("div");
+        card.className = "collab-card";
+
+        let deleteButtonHtml = "";
+        if (IS_ADMIN) {
+            deleteButtonHtml = `<button class="btn-danger delete-btn" onclick="deleteCollab(${index})">削除</button>`;
+        }
+
+        card.innerHTML = `
+            <img src="${c.thumbnail}" class="collab-thumb">
+            <div class="collab-info">
+                <h2>${c.title}</h2>
+                <p>配信者：${c.author}</p>
+            </div>
+            ${deleteButtonHtml}
+        `;
+
+        /* ▼ カード全体クリック（削除ボタン以外） */
+        card.addEventListener("click", (e) => {
+            if (!e.target.classList.contains("delete-btn")) {
+                window.open(c.url, "_blank");
+            }
+        });
+
+        container.appendChild(card);
+    });
+}
+
+/* ====== 削除 ====== */
+function deleteCollab(index) {
+    if (!IS_ADMIN) return;
+
+    let list = JSON.parse(localStorage.getItem("collabs") || "[]");
+    list.splice(index, 1);
+    localStorage.setItem("collabs", JSON.stringify(list));
+    renderCollabs();
+}
+
+renderCollabs();
+
+/* ====== 画像が出る ====== */
+function showCollabImage() {
+    const modal = document.getElementById("imageModal");
+    const img = document.getElementById("modalImage");
+
+    // 表示したい画像パス
+    img.src = "/static/img/collab_sample.png";
+
+    modal.style.display = "flex";
+}
+
+function closeModal(e) {
+    // 背景クリック or ×クリックで閉じる
+    if (!e || e.target === e.currentTarget) {
+        document.getElementById("imageModal").style.display = "none";
+    }
+}
+
+
+
+
+
+</script>
+
+
+<!-- ▼ 画像モーダル -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+    <span class="close-btn" onclick="closeModal(event)">×</span>
+    <img id="modalImage" class="modal-content">
+</div>
+
+</body>
+
+
+</html>

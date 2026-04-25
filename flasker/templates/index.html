@@ -14,28 +14,26 @@
 <div class="line-yellow"></div>
 <div class="line-w6"></div>
 
+
+
 <h1>いぬいどんどんすきになる</h1>
 
 <!-- ▼ グッズ・リンク集 -->
-<div class="link-buttons">
-  <a href="https://twitter.com/inui_toko" target="_blank" class="link-button">Twitter</a>
-  <a href="https://www.youtube.com/channel/UCXRlIK3Cw_TJIQC5kSJJQMg" target="_blank" class="link-button">YouTube</a>
-  <a href="https://shop.nijisanji.jp/1070" target="_blank" class="link-button">公式ストア</a>
-  <a href="https://marshmallow-qa.com/inui_toko" target="_blank" class="link-button">マシュマロ</a>
-  <a href="https://wikiwiki.jp/nijisanji/戌亥とこ" target="_blank" class="link-button">Wiki</a>
+<div class="link-buttons kokosuki-fix" style="text-align: left; margin: 20px 0;">
+    <a href="https://twitter.com/inui_toko" target="_blank" class="btn">Twitter</a>
+    <a href="https://www.youtube.com/channel/UCXRlIK3Cw_TJIQC5kSJJQMg" target="_blank" class="btn">YouTube</a>
+    <a href="https://shop.nijisanji.jp/1070" target="_blank" class="btn">公式ストア</a>
+    <a href="https://marshmallow-qa.com/inui_toko" target="_blank" class="btn">マシュマロ</a>
+    <a href="https://wikiwiki.jp/nijisanji/戌亥とこ" target="_blank" class="btn">Wiki</a>
+
 </div>
-
-
-
 
 <h1>あなたは {{ count }} 人目の訪問者です</h1>
 
-<!-- ▼ 戌亥ここ好きボタン -->
-<div class="kokosuki-fix" style="text-align: left; margin: 20px 0;">
-    <a href="{{ url_for('main.kokosuki') }}" class="link-button">戌亥ここ好き</a>
+<div class="link-buttons kokosuki-fix">
+    <a href="{{ url_for('main.kokosuki') }}" class="btn">戌亥のここ好き</a>
+    <a href="{{ url_for('main.collab') }}" class="btn">コラボ一覧</a>
 </div>
-
-
 
 
 
@@ -47,21 +45,24 @@
     <button class="week-btn week-left">‹</button>
 
     <div class="week-list" id="weekList">
-        <!-- JS で日付を入れるので最初は空でOK -->
+        <!-- JS がここに日付カードを入れる -->
     </div>
 
     <button class="week-btn week-right">›</button>
 </div>
 
+{% if session.get('admin') %}
 <div class="schedule-input">
   <input type="date" id="dateInput">
   <input type="time" id="timeInput">
   <input type="url" id="urlInput" placeholder="URLを入力">
-  <button onclick="addSchedule()">追加</button>
+  <button class="btn" onclick="addSchedule()">追加</button>
+
 </div>
+{% endif %}
 
+<!-- ▼ カレンダー本体（JS がここにカードを入れる） -->
 <div id="calendar" class="week-calendar"></div>
-
 
 <!-- ▼ YouTube 最新動画 -->
 <h2>YouTube 最新動画</h2>
@@ -89,22 +90,26 @@ function scrollVideos(dir) {
 
 <button class="scroll-btn" onclick="scrollVideos(1)">›</button>
 
-
-<!-- ★★★ 管理者フラグを JS に渡す（必ず script.js より前） ★★★ -->
+<!-- 管理者フラグ -->
 <script>
-const IS_ADMIN = {{ 'true' if session.get('admin') else 'false' }};
+const IS_ADMIN = {{ session.get('admin') | tojson }};
 </script>
 
-<!-- ★★★ スケジュール・YouTube処理のメインJS ★★★ -->
+<!-- メインJS -->
 <script src="/static/js/script.js"></script>
 
-<!-- デバック用 -->
-<div id="mouse-debug"></div>
-
 {% if session.get('admin') %}
-    <img src="/static/img/login_toy.png" alt="管理者" style="width:120px;">
+<div id="mouse-debug"></div>
+<img src="/static/img/login_toy.png" alt="管理者" style="width:120px;">
 {% endif %}
 
+{% if debug %}
+<div style="background:#222; color:#0f0; padding:10px; margin-top:20px;">
+    <h3>DEBUG MODE (Admin Only)</h3>
+    <p>count: {{ count }}</p>
+    <p>videos loaded: {{ videos|length }}</p>
+</div>
+{% endif %}
 
 </body>
 </html>

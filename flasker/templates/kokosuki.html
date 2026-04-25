@@ -2,106 +2,187 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>戌亥ここ好き</title>
+<title>戌亥のここ好き</title>
 
 <link rel="stylesheet" href="/static/css/style.css">
 
 <style>
-.kokosuki-container {
-    max-width: 700px;
-    margin: 40px auto;
-    padding: 20px;
-    background: rgba(255,255,255,0.85);
-    border-radius: 10px;
+
+
+/* ▼ 全体の幅を1000pxに統一 */
+.kokosuki-container,
+.collab-container,
+#list,
+#collabList,
+.input-row,
+.input-area {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
 }
 
-.back-btn {
-    display: inline-block;
-    padding: 8px 14px;
-    background: #444;
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
-    margin-bottom: 20px;
-}
-
-.back-btn:hover {
-    background: #222;
-}
-
+/* ▼ タイトル（1000pxに合わせて中央） */
 .page-title {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 20px;
+    max-width: 1000px;
+    margin: 0 auto 25px;
+    font-size: 40px;
+    font-weight: 900;
     text-align: center;
+    letter-spacing: 2px;
+    color: #FFD84C;
+    text-shadow: 0 0 10px rgba(255,216,76,0.5);
 }
 
+/* ▼ 入力フォーム（1000pxに統一） */
 .input-row {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 10px;
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
 }
 
-.input-row input {
+.input-row input,
+.input-row .btn {
     flex: 1;
-    padding: 8px;
-    font-size: 14px;
-}
-
-button {
-    padding: 8px 14px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.item {
-    border: 1px solid #ccc;
-    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    font-size: 15px;
     border-radius: 6px;
-    margin-top: 12px;
+}
+
+/* コメント欄を長く、追加ボタンを短く */
+.input-row input#comment {
+    flex: 4;
+}
+
+.input-row .btn {
+    flex: 1;
+    max-width: 120px;
+}
+
+/* ▼ 一覧（1000pxに統一） */
+#list {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ====== ここすきカード（1000pxに統一） ====== */
+.item {
+    max-width: 1000px;
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px; /* ← 横広くなったので少し余裕を追加 */
+    margin: 0 auto 20px;
     display: flex;
-    gap: 12px;
+    align-items: center;
+    gap: 20px; /* ← 余白を広げてゆったり */
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
 }
 
-.thumb {
-    width: 120px;
-    height: 90px;
+.item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.item * {
+    color: #fff !important;
+}
+
+/* ▼ サムネ（1000pxに合わせて少し大きく） */
+.kokosuki-thumb {
+    width: 220px;
+    height: 124px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
+/* ▼ テキスト（自然に折り返す） */
 .info {
     flex: 1;
 }
 
-.delete-btn {
-    background: #e33;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    height: 30px;
+.info b {
+    font-size: 22px;
+    margin-bottom: 6px;
 }
+
+.info p {
+    margin: 4px 0;
+    opacity: 0.8;
+}
+
+/* ▼ 時間表示 */
+.time-display {
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0.9;
+    margin-bottom: 4px;
+}
+
+/* ▼ 削除ボタン */
+.btn-danger {
+    border: 2px solid #ff4c4c;
+    background: transparent;
+    color: #ff4c4c;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-danger:hover {
+    background: #ff4c4c;
+    color: #fff;
+    box-shadow: 0 0 10px #ff4c4c;
+}
+
+#randomArea .item {
+    margin-bottom: 30px;
+}
+
+#randomArea3 .item {
+    margin-bottom: 25px;
+}
+
+/* ▼ フェードインアニメーション */
+.fade-in {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="line-w1"></div>
-<div class="line-red"></div>
-<div class="line-w3"></div>
-<div class="line-w4"></div>
-<div class="line-yellow"></div>
-<div class="line-w6"></div>
-
 <div class="kokosuki-container">
 
-    <a href="{{ url_for('main.index') }}" class="back-btn">← 戻る</a>
+    <!-- 戻るボタン削除済み -->
 
-    <div class="page-title">戌亥ここ好き</div>
+    <div class="page-title">戌亥のここ好き</div>
 
-    <h2>YouTube URL とコメントを追加</h2>
+    <p>
+        戌亥とこの「ここ好き」を投稿できます。歌、声、仕草、配信の一瞬など、あなたが“心を掴まれた瞬間”を自由に共有してください。<br>
+        YouTube URL とコメント、分秒を入れるとその位置から再生できます。切り抜きじゃないので歌枠からもOKです。<br>
+    </p>
 
     <div class="input-row">
         <input id="youtubeUrl" type="text" placeholder="YouTube の URL を入力">
@@ -114,16 +195,30 @@ button {
 
     <div class="input-row">
         <input id="comment" type="text" placeholder="コメントを入力">
-        <button onclick="addItem()">追加</button>
+        <button class="btn" onclick="addItem()">追加</button>
     </div>
+     <p><!-- ランダム表示ボタン -->
+       <button class="btn" onclick="showRandom()">ランダム表示</button> ←迷ったらこれ！みんなが追加したここ好きが詰まってるからハズレがない。
+       クリックしてみろ、飛ぶぞ
+    </p>
 
-    <h3>追加された一覧</h3>
+
+    <p>
+        <div id="randomArea3"></div>
+        <button class="btn" onclick="showRandom3()">3件ガチャ</button>
+        ←ランダム表示の３連版。ボタンおすとと表示されてる3枚のカードが変わります。カードクリックすると動画に飛びます。
+    </p>
+
+
+
+
+
+    <h3 style="max-width:1000px;margin:20px auto 10px;">追加された一覧がこちら　カードをクリックするとそこから始まります。</h3>
     <div id="list"></div>
 
 </div>
 
 <script>
-// Flask から渡された admin 情報
 const IS_ADMIN = {{ 'true' if admin else 'false' }};
 
 // YouTube ID 抽出
@@ -132,7 +227,7 @@ function extractVideoId(url) {
     return match ? match[1] : null;
 }
 
-// タイトル取得（noembed）
+// タイトル取得
 async function fetchTitle(url) {
     try {
         const res = await fetch(`https://noembed.com/embed?url=${url}`);
@@ -149,7 +244,7 @@ function loadItems() {
     saved.forEach(item => renderItem(item));
 }
 
-// 追加処理（時間指定対応）
+// 追加処理
 async function addItem() {
     const urlBase = document.getElementById("youtubeUrl").value.trim();
     const comment = document.getElementById("comment").value.trim();
@@ -170,7 +265,8 @@ async function addItem() {
     const title = await fetchTitle(url);
     const thumb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
-    const item = { url, comment, title, thumb };
+    const item = { url, comment, title, thumb, minute, second };
+
     saveItem(item);
     renderItem(item);
 
@@ -180,29 +276,32 @@ async function addItem() {
     document.getElementById("secondInput").value = "";
 }
 
-// 表示（管理者だけ削除ボタン）
+// 表示
 function renderItem(item) {
     const list = document.getElementById("list");
 
     const div = document.createElement("div");
     div.className = "item";
 
-    let deleteButtonHtml = "";
-    if (IS_ADMIN) {
-        deleteButtonHtml = `<button class="delete-btn">削除</button>`;
-    }
+    const timeText = `${item.minute}:${String(item.second).padStart(2, '0')}`;
 
     div.innerHTML = `
-        <img class="thumb" src="${item.thumb}">
+        <img class="kokosuki-thumb" src="${item.thumb}">
         <div class="info">
-            <a href="${item.url}" target="_blank"><b>${item.title}</b></a>
+            <div class="time-display">${timeText}</div>
+            <b>${item.title}</b>
             <p>${item.comment}</p>
         </div>
-        ${deleteButtonHtml}
+        ${IS_ADMIN ? `<button class="btn-danger delete-btn">削除</button>` : ""}
     `;
 
+    div.onclick = () => window.open(item.url, "_blank");
+
     if (IS_ADMIN) {
-        div.querySelector(".delete-btn").onclick = () => {
+        const delBtn = div.querySelector(".delete-btn");
+        delBtn.onclick = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
             div.remove();
             deleteItem(item.url);
         };
@@ -225,8 +324,67 @@ function deleteItem(url) {
     localStorage.setItem("youtubeItems", JSON.stringify(saved));
 }
 
-// ページ読み込み時に実行
 loadItems();
+// ランダム表示
+function showRandom() {
+    const saved = JSON.parse(localStorage.getItem("youtubeItems") || "[]");
+    if (saved.length === 0) {
+        alert("まだ投稿がありません");
+        return;
+    }
+
+    const randomItem = saved[Math.floor(Math.random() * saved.length)];
+
+    // ランダムで開く
+    window.open(randomItem.url, "_blank");
+}
+
+// ページ読み込み時に自動で3件ガチャ
+window.addEventListener("DOMContentLoaded", () => {
+    showRandom3();
+});
+
+
+function showRandom3() {
+    const saved = JSON.parse(localStorage.getItem("youtubeItems") || "[]");
+    if (saved.length === 0) {
+        alert("まだ投稿がありません");
+        return;
+    }
+
+    // シャッフルして先頭3件を取る
+    const shuffled = [...saved].sort(() => Math.random() - 0.5);
+    const picks = shuffled.slice(0, 3);
+
+    const area = document.getElementById("randomArea3");
+    area.innerHTML = ""; // 前の結果を消す
+
+    picks.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "item fade-in";  // ← アニメーション追加
+
+        // 遅延をつけて「1枚ずつ」出す
+        div.style.animationDelay = `${index * 0.15}s`;
+
+        const timeText = `${item.minute}:${String(item.second).padStart(2, '0')}`;
+
+        div.innerHTML = `
+            <img class="kokosuki-thumb" src="${item.thumb}">
+            <div class="info">
+                <div class="time-display">${timeText}</div>
+                <b>${item.title}</b>
+                <p>${item.comment}</p>
+            </div>
+        `;
+
+        div.onclick = () => window.open(item.url, "_blank");
+
+        area.appendChild(div);
+    });
+}
+
+
+
 </script>
 
 </body>

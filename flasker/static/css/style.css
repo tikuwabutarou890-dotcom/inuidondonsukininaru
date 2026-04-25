@@ -41,7 +41,6 @@ main, .scroll-container {
 ============================ */
 h1 { margin-bottom: 20px; }
 
-/* ▼ 親はレイアウト用（名前変更済み） */
 .link-buttons {
   display: flex;
   gap: 10px;
@@ -49,7 +48,6 @@ h1 { margin-bottom: 20px; }
   margin-bottom: 20px;
 }
 
-/* ▼ ボタンの見た目は a.link-button に統一 */
 a.link-button {
   display: inline-flex;
   align-items: center;
@@ -60,8 +58,6 @@ a.link-button {
   text-decoration: none;
   color: #000;
   background: #fff;
-
-  /* 透明ボーダーで形が変わらない */
   border: 2px solid transparent;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
@@ -75,7 +71,6 @@ a.link-button:hover {
     inset 0 0 5px #92F3A4;
 }
 
-/* ここ好きボタンを前面に出す */
 .kokosuki-fix {
   position: relative;
   z-index: 50;
@@ -84,15 +79,104 @@ a.link-button:hover {
 /* ============================
    ■ 週スケジュール
 ============================ */
-.week-scroll-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
+.week-list {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 10px 0;
+    width: 100%;
+    scrollbar-width: none;
+
+    /* ← これが決定打！ */
+    min-width: max-content;
+}
+.week-list::-webkit-scrollbar { display: none; }
+
+.day-card {
+  width: 240px;          /* ← min-width ではなく width に統一 */
+  flex: 0 0 240px;       /* ← 絶対に伸びない */
+  box-sizing: border-box;/* ← padding を含めて 240px 内に収める */
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px #0D0F2B;
+  color: #000;
 }
 
+/* ============================
+   ■ スケジュールカード
+============================ */
+.schedule-card {
+  position: relative;
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+
+  background: #0D0F2B;          /* ← 完全一致！ */
+  border: 2px solid #92F3A4;    /* ミント枠線 */
+  border-radius: 10px;
+  border-left: 4px solid #92F3A4;
+  color: #fff;
+
+  box-shadow: 0 4px 12px rgba(13, 15, 43, 0.45);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.schedule-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 12px #92F3A4,
+    0 0 20px rgba(146,243,164,0.6);
+}
+
+
+
+/* ▼ schedule-main（ホバー対象） */
+.schedule-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transform-style: preserve-3d;
+
+  text-decoration: none;   /* ← 下線を完全に消す */
+  color: inherit;          /* ← 文字色も親に合わせる（重要） */
+}
+
+.schedule-main:hover {
+  transform: translateY(-6px) rotateX(4deg) rotateY(2deg) scale(1.03);
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.25),
+    0 0 12px rgba(146,243,164,0.6);
+}
+
+/* ▼ 削除ボタン（右上固定） */
+/* ▼ 削除ボタンを右上に固定 */
+.side-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  background: #d33;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 20;
+}
+
+/* ▼ スケジュールのスクロールボタンを YouTube動画と同じにする */
 .week-btn {
-  background: #2aa775;
+  background: #2aa775;   /* 緑 */
   color: white;
   border: none;
   padding: 10px 14px;
@@ -100,113 +184,86 @@ a.link-button:hover {
   cursor: pointer;
   font-size: 20px;
   margin: 0 5px;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .week-btn:hover {
-  background: #1f8a60;
+  background: #1f8a60;   /* 濃い緑 */
+  transform: translateY(-2px);
+}
+
+.week-scroll-container {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* ← ボタンと日付の距離を小さくする */
+}
+
+.week-btn {
+  flex-shrink: 0; /* ← ボタンが押しつぶされない */
 }
 
 .week-list {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  padding: 10px 0;
-  width: 100%;
-  scrollbar-width: none;
+  flex: 1; /* ← 日付リストが中央に広がる */
 }
 
-.week-list::-webkit-scrollbar { display: none; }
 
-.week-item {
-  min-width: 140px;
-  scroll-snap-align: start;
-}
 
-.day-card {
-  min-width: 140px;
-  background: white;
-  padding: 12px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #000;
+/* ============================
+   ■ タイトル
+============================ */
+.schedule-title {
+    color: #92F3A4 !important; /* ミントグリーン */
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.4;
+
+    /* ここすき風の光り方 */
+    text-shadow:
+        0 0 6px rgba(146,243,164,0.6),
+        0 0 12px rgba(146,243,164,0.4);
 }
 
 /* ============================
-   ■ スケジュール入力
+   ■ サムネイル
 ============================ */
-.schedule-input {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.week-calendar {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-}
-
-.day-column {
-  min-width: 150px;
-  padding: 10px;
-  background: #f4f4f4;
-  border-radius: 8px;
-}
-
-.schedule-card {
-  width: 240px;
-  min-width: 240px;
-  background: white;
-  padding: 8px;
-  margin-top: 8px;
-  border-radius: 6px;
-  border-left: 4px solid #4caf50;
-  font-size: 14px;
-  color: #000;
-}
-
 .schedule-thumb {
-  width: 240px;
-  border-radius: 8px;
-  margin-top: 6px;
-}
-
-.schedule-thumb:hover {
-  box-shadow:
-    0 -2px 8px #92F3A4,
-    0 0 5px #92F3A4,
-    inset 0 0 5px #92F3A4;
-}
-
-.schedule-time {
-  font-size: 24px;
-  font-weight: 800;
-  color: #4caf50;
-  text-shadow: 0 0 6px rgba(76,175,80,0.6);
-  padding: 4px 8px;
-  background: rgba(76,175,80,0.12);
+  width: 100%;
+  height: 135px;
+  object-fit: cover;
   border-radius: 6px;
-  display: inline-block;
+  margin-top: 6px;
+  box-sizing: border-box;
 }
 
-.delete-btn {
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+/* ============================
+   ■ 時間
+============================ */
+.schedule-time {
+    display: inline-block;
+    padding: 6px 14px;              /* ← 少し大きめに調整 */
+    font-size: 16px;                /* ← 14px → 16px にアップ */
+    font-weight: 700;
+    color: #92F3A4;                 /* ミントグリーン */
+    border: 2px solid #92F3A4;      /* ボタンと同じ太さに */
+    border-radius: 8px;
+    background: rgba(13, 15, 43, 0.35); /* 濃紺の透明感 */
+    box-shadow: 0 3px 8px rgba(13, 15, 43, 0.45);
+    white-space: nowrap;            /* ← 時間が折り返されない */
+    width: fit-content;             /* ← 中身に合わせて幅が決まる */
+    transition: 0.2s ease;
 }
 
-.delete-btn:hover {
-  background: #e05555;
+/* ホバーで光る（ここすきボタンと同じ） */
+.schedule-time:hover {
+    background: rgba(146, 243, 164, 0.15);
+    box-shadow:
+        0 0 10px rgba(146,243,164,0.6),
+        0 0 20px rgba(146,243,164,0.4);
+    transform: translateY(-2px);
 }
+
+
+
 
 /* ============================
    ■ YouTube 最新動画
@@ -245,13 +302,6 @@ a.link-button:hover {
 
 .video-list::-webkit-scrollbar { display: none; }
 
-.video-link {
-  display: block;
-  flex: 0 0 auto;
-  text-decoration: none;
-  color: inherit;
-}
-
 .video-card {
   width: 240px;
   min-width: 240px;
@@ -277,6 +327,13 @@ a.link-button:hover {
   border-radius: 8px;
 }
 
+.video-link {
+    text-decoration: none !important;
+    color: inherit !important;
+    display: inline-block;
+}
+
+
 /* ============================
    ■ デバッグ
 ============================ */
@@ -292,4 +349,141 @@ a.link-button:hover {
   z-index: 99999;
   pointer-events: none;
   user-select: none;
+}
+
+/* --- サムネ横にコメント・タイトルを並べるレイアウト --- */
+.item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px;
+    margin-bottom: 14px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+/* サムネ */
+.kokosuki-thumb {
+    width: 140px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* 右側の情報エリア */
+.info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* タイトル */
+.info b {
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+/* コメント */
+.info p {
+    font-size: 14px;
+    margin: 4px 0;
+    line-height: 1.4;
+}
+
+/* 時間表示 */
+.time-display {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 6px;
+}
+
+.kokosuki-item-link {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+#mouse-debug {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+
+    width: fit-content !important;
+    max-width: max-content !important;
+    display: inline-block !important;
+
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.6);
+    color: #0f0;
+
+    font-size: 12px;
+    border-radius: 6px !important;
+    box-shadow: 0 0 6px rgba(0,0,0,0.5) !important;
+
+    z-index: 99999;
+    pointer-events: none;
+}
+
+
+
+.kokosuki-text {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    color: #fff;
+    background: rgba(0,0,0,0.25);
+    padding: 10px 14px;
+    border-radius: 8px;
+}
+
+/* ====== 統一ボタン ====== */
+.btn {
+    padding: 10px 20px;
+    background: #0D0F2B; /* 濃紺ベース */
+    border: 2px solid #92F3A4; /* ミント枠線 */
+    border-radius: 8px;
+    color: #92F3A4; /* ミント文字 */
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important; /* ← 下線を完全に消す */
+}
+
+.btn:hover {
+    background: #92F3A4; /* ホバーでミント反転 */
+    color: #0D0F2B; /* 文字は濃紺に */
+    box-shadow: 0 0 10px #92F3A4;
+}
+
+/* 小さめボタン（削除など） */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+/* 危険操作（削除）だけは赤で統一 */
+.btn-danger {
+    border-color: #ff4c4c;
+    color: #ff4c4c;
+}
+
+.btn-danger:hover {
+    background: #ff4c4c;
+    color: #fff;
+    box-shadow: 0 0 10px #ff4c4c;
+}
+
+.link-buttons.kokosuki-fix {
+    margin: 0;
+    text-align: left;
 }
