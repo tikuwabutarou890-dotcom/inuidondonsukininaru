@@ -117,3 +117,13 @@ def logout():
 # ============================
 def is_admin():
     return session.get("admin") is True
+
+# ============================
+#   アクセス解析
+# ============================
+import logging
+from flask import request
+
+@app.before_request
+def log_request_info():
+    app.logger.info(f"{request.remote_addr} {request.method} {request.path}")
