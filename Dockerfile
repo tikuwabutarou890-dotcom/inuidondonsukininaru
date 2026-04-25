@@ -5,9 +5,13 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# flasker ディレクトリをコピー
+COPY flasker ./flasker
 
-ENV PORT=8080
-EXPOSE 8080
+# 他の必要ファイルだけコピー（. を丸ごとコピーしない）
+COPY fly.toml .
+COPY .env .
+COPY Dockerfile .
+COPY README.md .
 
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "flasker:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "flasker:app", "--access-logfile", "-"]
