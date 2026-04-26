@@ -147,22 +147,22 @@ async function addSchedule() {
     let thumbnail = null;
     let title = null;
 
-    try {
-        let fixedUrl = url;
-
-        // /live/xxxx → watch?v=xxxx に変換
-        if (url.includes("/live/")) {
-    const id = extractYouTubeId(url);
+    // ▼ /live/xxxx → watch?v=xxxx に変換
+    let fixedUrl = url;
+    if (url.includes("/live/")) {
+        const id = extractYouTubeId(url);
         if (id) fixedUrl = `https://www.youtube.com/watch?v=${id}`;
-        }
+    }
 
-    const res = await fetch(`https://noembed.com/embed?url=${fixedUrl}`);
+    try {
+        // ▼ YouTube公式 oEmbed API（ライブでもタイトル取れる）
+        const res = await fetch(`https://www.youtube.com/oembed?url=${fixedUrl}&format=json`);
+        const data = await res.json();
 
-    const data = await res.json();
-
-        if (data.video_id) videoId = data.video_id;
-        if (data.title) title = data.title;   // ← タイトル取得
-    } catch {}
+        if (data.title) title = data.title;
+    } catch (e) {
+        console.log("oEmbed error:", e);
+    }
 
     if (videoId) {
         thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -185,6 +185,7 @@ async function addSchedule() {
         alert("追加に失敗しました（管理者のみ）");
     }
 }
+
 
 // ===============================
 // ▼ 削除
