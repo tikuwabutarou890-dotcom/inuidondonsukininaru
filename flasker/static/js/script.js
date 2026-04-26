@@ -148,8 +148,17 @@ async function addSchedule() {
     let title = null;
 
     try {
-        const res = await fetch(`https://noembed.com/embed?url=${url}`);
-        const data = await res.json();
+        let fixedUrl = url;
+
+        // /live/xxxx → watch?v=xxxx に変換
+        if (url.includes("/live/")) {
+    const id = extractYouTubeId(url);
+        if (id) fixedUrl = `https://www.youtube.com/watch?v=${id}`;
+        }
+
+    const res = await fetch(`https://noembed.com/embed?url=${fixedUrl}`);
+
+    const data = await res.json();
 
         if (data.video_id) videoId = data.video_id;
         if (data.title) title = data.title;   // ← タイトル取得
