@@ -60,38 +60,10 @@ def api_add_schedule():
     return jsonify({"status": "ok"})
 
 
-
-
-# ▼ スケジュール追加（管理者だけOK）
-@bp.route("/api/schedule/add", methods=["POST"])
-def api_add_schedule():
-
-    if not session.get("admin"):
-        return jsonify({"error": "not_admin"}), 403
-
-    data = request.json
-    time = data["time"]
-
-    # ★ 30分刻みチェック
-    hh, mm = time.split(":")
-    if mm not in ["00", "30"]:
-        return jsonify({"error": "invalid_time"}), 400
-
-    conn = get_db()
-    conn.execute(
-        "INSERT INTO schedules (date, time, url, title, thumbnail) VALUES (?, ?, ?, ?, ?)",
-        (data["date"], time, data["url"], data.get("title"), data.get("thumbnail"))
-    )
-    conn.commit()
-    conn.close()
-    return jsonify({"status": "ok"})
-
-
 # ▼ スケジュール削除（管理者だけOK）
 @bp.route("/api/schedule/delete", methods=["POST"])
 def api_delete_schedule():
 
-    # ★ 管理者チェック（既にOK）
     if not session.get("admin"):
         return jsonify({"error": "not_admin"}), 403
 
