@@ -487,3 +487,19 @@ a.link-button:hover {
     margin: 0;
     text-align: left;
 }
+/* 日付ハイライト */
+.day-card.selected {
+    background: #FFD84C;
+    color: #000;
+    border-radius: 8px;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(255,216,76,0.6);
+}
+
+/* 入力フォームをボタンと同じくらい大きく */
+.schedule-input input {
+    padding: 12px 14px;
+    font-size: 18px;
+    height: 42px;
+}
+

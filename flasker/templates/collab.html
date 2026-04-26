@@ -121,7 +121,7 @@
 
 /* ▼ モーダル背景（黒半透明） */
 .modal {
-    display: none; /* 最初は非表示 */
+    display: none;
     position: fixed;
     z-index: 9999;
     left: 0;
@@ -134,7 +134,7 @@
     align-items: center;
 }
 
-/* ▼ モーダル内の画像（大きめ） */
+/* ▼ モーダル内の画像 */
 .modal-content {
     max-width: 80%;
     max-height: 80%;
@@ -159,9 +159,6 @@
     from { opacity: 0; transform: scale(0.95); }
     to   { opacity: 1; transform: scale(1); }
 }
-
-
-
 </style>
 </head>
 
@@ -186,8 +183,6 @@
         戌亥とこが参加したコラボ配信をまとめて記録できます。YouTube URL を入力すると自動でサムネイルとタイトルを取得します。<br>
         追加すると一番上に出ます。ダブったものは古いのが消えます。<br>
     </p>
-<div id="collabImageArea"></div>
-
 
     <div class="input-area">
         <input id="collabUrl" type="text" placeholder="YouTube の URL を入力">
@@ -199,54 +194,51 @@
 
 </div>
 
-
 <script>
-/* ====== 追加処理 ====== */
-function addCollab() {
+// ===============================
+//  コラボ 永続化：追加
+// ===============================
+async function addCollab() {
     const url = document.getElementById("collabUrl").value.trim();
     if (!url) return;
 
-    fetch(`https://noembed.com/embed?url=${url}`)
-        .then(res => res.json())
-        .then(data => {
-            const collab = {
-                url: url,
-                title: data.title,
-                author: data.author_name,
-                thumbnail: data.thumbnail_url
-            };
+    const res = await fetch(`https://noembed.com/embed?url=${url}`);
+    const data = await res.json();
 
-            saveCollab(collab);
-            renderCollabs();
-            document.getElementById("collabUrl").value = "";
-        });
+    const collab = {
+        url: url,
+        title: data.title,
+        author: data.author_name,
+        thumbnail: data.thumbnail_url
+    };
+
+    await fetch("/api/collab/add", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(collab)
+    });
+
+    document.getElementById("collabUrl").value = "";
+    loadCollabs();
 }
 
-/* ====== 保存（重複は古い方を削除） ====== */
-function saveCollab(collab) {
-    let list = JSON.parse(localStorage.getItem("collabs") || "[]");
-
-    list = list.filter(item => item.url !== collab.url);
-    list.push(collab);
-
-    localStorage.setItem("collabs", JSON.stringify(list));
-}
-
-/* ====== 表示（新しい順） ====== */
-function renderCollabs() {
-    let list = JSON.parse(localStorage.getItem("collabs") || "[]");
-    list = list.reverse();
+// ===============================
+//  一覧読み込み（DB → API）
+// ===============================
+async function loadCollabs() {
+    const res = await fetch("/api/collab/list");
+    const list = await res.json();
 
     const container = document.getElementById("collabList");
     container.innerHTML = "";
 
-    list.forEach((c, index) => {
+    list.forEach(c => {
         const card = document.createElement("div");
         card.className = "collab-card";
 
         let deleteButtonHtml = "";
         if (IS_ADMIN) {
-            deleteButtonHtml = `<button class="btn-danger delete-btn" onclick="deleteCollab(${index})">削除</button>`;
+            deleteButtonHtml = `<button class="btn-danger delete-btn" onclick="deleteCollab(${c.id})">削除</button>`;
         }
 
         card.innerHTML = `
@@ -258,7 +250,6 @@ function renderCollabs() {
             ${deleteButtonHtml}
         `;
 
-        /* ▼ カード全体クリック（削除ボタン以外） */
         card.addEventListener("click", (e) => {
             if (!e.target.classList.contains("delete-btn")) {
                 window.open(c.url, "_blank");
@@ -269,42 +260,40 @@ function renderCollabs() {
     });
 }
 
-/* ====== 削除 ====== */
-function deleteCollab(index) {
+// ===============================
+//  削除（管理者のみ）
+// ===============================
+async function deleteCollab(id) {
     if (!IS_ADMIN) return;
 
-    let list = JSON.parse(localStorage.getItem("collabs") || "[]");
-    list.splice(index, 1);
-    localStorage.setItem("collabs", JSON.stringify(list));
-    renderCollabs();
+    await fetch("/api/collab/delete", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: id})
+    });
+
+    loadCollabs();
 }
 
-renderCollabs();
-
-/* ====== 画像が出る ====== */
+// ===============================
+//  モーダル画像
+// ===============================
 function showCollabImage() {
     const modal = document.getElementById("imageModal");
     const img = document.getElementById("modalImage");
-
-    // 表示したい画像パス
     img.src = "/static/img/collab_sample.png";
-
     modal.style.display = "flex";
 }
 
 function closeModal(e) {
-    // 背景クリック or ×クリックで閉じる
     if (!e || e.target === e.currentTarget) {
         document.getElementById("imageModal").style.display = "none";
     }
 }
 
-
-
-
-
+// 初期ロード
+loadCollabs();
 </script>
-
 
 <!-- ▼ 画像モーダル -->
 <div id="imageModal" class="modal" onclick="closeModal()">
@@ -313,6 +302,4 @@ function closeModal(e) {
 </div>
 
 </body>
-
-
 </html>

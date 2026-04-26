@@ -169,13 +169,12 @@
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="kokosuki-container">
-
-    <!-- 戻るボタン削除済み -->
 
     <div class="page-title">戌亥のここ好き</div>
 
@@ -197,23 +196,21 @@
         <input id="comment" type="text" placeholder="コメントを入力">
         <button class="btn" onclick="addItem()">追加</button>
     </div>
-     <p><!-- ランダム表示ボタン -->
-       <button class="btn" onclick="showRandom()">ランダム表示</button> ←迷ったらこれ！みんなが追加したここ好きが詰まってるからハズレがない。
-       クリックしてみろ、飛ぶぞ
-    </p>
 
+    <p>
+        <button class="btn" onclick="showRandom()">ランダム表示</button>
+        ←迷ったらこれ！みんなが追加したここ好きが詰まってるからハズレがない。
+    </p>
 
     <p>
         <div id="randomArea3"></div>
         <button class="btn" onclick="showRandom3()">3件ガチャ</button>
-        ←ランダム表示の３連版。ボタンおすとと表示されてる3枚のカードが変わります。カードクリックすると動画に飛びます。
+        ←ランダム表示の３連版
     </p>
 
-
-
-
-
-    <h3 style="max-width:1000px;margin:20px auto 10px;">追加された一覧がこちら　カードをクリックするとそこから始まります。</h3>
+    <h3 style="max-width:1000px;margin:20px auto 10px;">
+        追加された一覧がこちら　カードをクリックするとそこから始まります。
+    </h3>
     <div id="list"></div>
 
 </div>
@@ -238,13 +235,9 @@ async function fetchTitle(url) {
     }
 }
 
-// ローカルストレージ読み込み
-function loadItems() {
-    const saved = JSON.parse(localStorage.getItem("youtubeItems") || "[]");
-    saved.forEach(item => renderItem(item));
-}
-
-// 追加処理
+// ===============================
+//  ここ好き 永続化：追加
+// ===============================
 async function addItem() {
     const urlBase = document.getElementById("youtubeUrl").value.trim();
     const comment = document.getElementById("comment").value.trim();
@@ -265,10 +258,15 @@ async function addItem() {
     const title = await fetchTitle(url);
     const thumb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
-    const item = { url, comment, title, thumb, minute, second };
+    const item = { url, comment, title, minute, second, thumbnail: thumb };
 
-    saveItem(item);
-    renderItem(item);
+    await fetch("/api/kokosuki/add", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(item)
+    });
+
+    loadItems();  // 再読み込み
 
     document.getElementById("youtubeUrl").value = "";
     document.getElementById("comment").value = "";
@@ -276,7 +274,22 @@ async function addItem() {
     document.getElementById("secondInput").value = "";
 }
 
-// 表示
+// ===============================
+//  一覧読み込み（DB → API）
+// ===============================
+async function loadItems() {
+    const res = await fetch("/api/kokosuki/list");
+    const items = await res.json();
+
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    items.forEach(item => renderItem(item));
+}
+
+// ===============================
+//  カード描画
+// ===============================
 function renderItem(item) {
     const list = document.getElementById("list");
 
@@ -286,7 +299,7 @@ function renderItem(item) {
     const timeText = `${item.minute}:${String(item.second).padStart(2, '0')}`;
 
     div.innerHTML = `
-        <img class="kokosuki-thumb" src="${item.thumb}">
+        <img class="kokosuki-thumb" src="${item.thumbnail}">
         <div class="info">
             <div class="time-display">${timeText}</div>
             <b>${item.title}</b>
@@ -299,77 +312,57 @@ function renderItem(item) {
 
     if (IS_ADMIN) {
         const delBtn = div.querySelector(".delete-btn");
-        delBtn.onclick = (e) => {
+        delBtn.onclick = async (e) => {
             e.stopPropagation();
-            e.preventDefault();
-            div.remove();
-            deleteItem(item.url);
+            await fetch("/api/kokosuki/delete", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({id: item.id})
+            });
+            loadItems();
         };
     }
 
     list.appendChild(div);
 }
 
-// 保存
-function saveItem(item) {
-    const saved = JSON.parse(localStorage.getItem("youtubeItems") || "[]");
-    saved.push(item);
-    localStorage.setItem("youtubeItems", JSON.stringify(saved));
-}
+// ===============================
+//  ランダム表示
+// ===============================
+async function showRandom() {
+    const res = await fetch("/api/kokosuki/list");
+    const items = await res.json();
 
-// 削除
-function deleteItem(url) {
-    let saved = JSON.parse(localStorage.getItem("youtubeItems") || "[]");
-    saved = saved.filter(item => item.url !== url);
-    localStorage.setItem("youtubeItems", JSON.stringify(saved));
-}
+    if (items.length === 0) return alert("まだ投稿がありません");
 
-loadItems();
-// ランダム表示
-function showRandom() {
-    const saved = JSON.parse(localStorage.getItem("youtubeItems") || "[]");
-    if (saved.length === 0) {
-        alert("まだ投稿がありません");
-        return;
-    }
-
-    const randomItem = saved[Math.floor(Math.random() * saved.length)];
-
-    // ランダムで開く
+    const randomItem = items[Math.floor(Math.random() * items.length)];
     window.open(randomItem.url, "_blank");
 }
 
-// ページ読み込み時に自動で3件ガチャ
-window.addEventListener("DOMContentLoaded", () => {
-    showRandom3();
-});
+// ===============================
+//  3件ガチャ
+// ===============================
+async function showRandom3() {
+    const res = await fetch("/api/kokosuki/list");
+    const items = await res.json();
 
+    if (items.length === 0) return alert("まだ投稿がありません");
 
-function showRandom3() {
-    const saved = JSON.parse(localStorage.getItem("youtubeItems") || "[]");
-    if (saved.length === 0) {
-        alert("まだ投稿がありません");
-        return;
-    }
-
-    // シャッフルして先頭3件を取る
-    const shuffled = [...saved].sort(() => Math.random() - 0.5);
+    const shuffled = [...items].sort(() => Math.random() - 0.5);
     const picks = shuffled.slice(0, 3);
 
     const area = document.getElementById("randomArea3");
-    area.innerHTML = ""; // 前の結果を消す
+    area.innerHTML = "";
 
     picks.forEach((item, index) => {
         const div = document.createElement("div");
-        div.className = "item fade-in";  // ← アニメーション追加
-
-        // 遅延をつけて「1枚ずつ」出す
+        div.className = "item fade-in";
         div.style.animationDelay = `${index * 0.15}s`;
 
         const timeText = `${item.minute}:${String(item.second).padStart(2, '0')}`;
 
         div.innerHTML = `
-            <img class="kokosuki-thumb" src="${item.thumb}">
+            <img class="kokosuki-thumb" src="${item.thumbnail}">
             <div class="info">
                 <div class="time-display">${timeText}</div>
                 <b>${item.title}</b>
@@ -383,8 +376,9 @@ function showRandom3() {
     });
 }
 
-
-
+// 初期ロード
+loadItems();
+showRandom3();
 </script>
 
 </body>

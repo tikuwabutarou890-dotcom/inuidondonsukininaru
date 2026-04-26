@@ -1,7 +1,4 @@
 # fly.toml app configuration file generated for inuidondonsukininaru on 2026-04-25T21:20:21+09:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
 
 app = 'inuidondonsukininaru'
 primary_region = 'nrt'
@@ -25,7 +22,3 @@ primary_region = 'nrt'
 [mounts]
   source = "data"
   destination = "/data"
-
-[experimental]
-  cmd = "gunicorn -w 4 -b 0.0.0.0:8080 flasker:app --access-logfile -"
-

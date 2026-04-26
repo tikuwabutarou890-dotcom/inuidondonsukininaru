@@ -14,8 +14,6 @@
 <div class="line-yellow"></div>
 <div class="line-w6"></div>
 
-
-
 <h1>いぬいどんどんすきになる</h1>
 
 <!-- ▼ グッズ・リンク集 -->
@@ -25,7 +23,6 @@
     <a href="https://shop.nijisanji.jp/1070" target="_blank" class="btn">公式ストア</a>
     <a href="https://marshmallow-qa.com/inui_toko" target="_blank" class="btn">マシュマロ</a>
     <a href="https://wikiwiki.jp/nijisanji/戌亥とこ" target="_blank" class="btn">Wiki</a>
-
 </div>
 
 <h1>あなたは {{ count }} 人目の訪問者です</h1>
@@ -34,9 +31,6 @@
     <a href="{{ url_for('main.kokosuki') }}" class="btn">戌亥のここ好き</a>
     <a href="{{ url_for('main.collab') }}" class="btn">コラボ一覧</a>
 </div>
-
-
-
 
 <!-- ▼ 週スケジュール -->
 <h2>今週のスケジュール</h2>
@@ -54,14 +48,13 @@
 {% if session.get('admin') %}
 <div class="schedule-input">
   <input type="date" id="dateInput">
-  <input type="time" id="timeInput">
+  <input type="time" id="timeInput" step="1800">
   <input type="url" id="urlInput" placeholder="URLを入力">
   <button class="btn" onclick="addSchedule()">追加</button>
-
 </div>
 {% endif %}
 
-<!-- ▼ カレンダー本体（JS がここにカードを入れる） -->
+<!-- ▼ カレンダー本体 -->
 <div id="calendar" class="week-calendar"></div>
 
 <!-- ▼ YouTube 最新動画 -->
@@ -81,14 +74,15 @@
         {% endfor %}
     </div>
 
+    <button class="scroll-btn" onclick="scrollVideos(1)">›</button>
+</div>
+
 <script>
 function scrollVideos(dir) {
     const list = document.querySelector(".video-list");
     list.scrollLeft += dir * 300;
 }
 </script>
-
-<button class="scroll-btn" onclick="scrollVideos(1)">›</button>
 
 <!-- 管理者フラグ -->
 <script>

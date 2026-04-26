@@ -56,6 +56,8 @@ function renderWeekList() {
 
         const card = document.createElement("div");
         card.className = "day-card";
+        card.dataset.date = dateKey;   // ← 日付クリック用
+
         card.innerHTML = `
             <h3>${d.getMonth() + 1}/${d.getDate()}</h3>
             <div id="day-${dateKey}" class="schedule-area"></div>
@@ -68,7 +70,7 @@ function renderWeekList() {
 }
 
 // ===============================
-// ▼ 1日のスケジュール描画（削除100%安定版）
+// ▼ 1日のスケジュール描画（タイトル必ず表示版）
 // ===============================
 function renderDaySchedules(dateKey) {
     const container = document.getElementById(`day-${dateKey}`);
@@ -81,44 +83,42 @@ function renderDaySchedules(dateKey) {
     schedules[dateKey].forEach(item => {
         const wrapper = document.createElement("div");
 
-    wrapper.innerHTML = `
-    <div class="schedule-card">
+        wrapper.innerHTML = `
+        <div class="schedule-card">
 
-        <!-- ▼ 左側（リンク部分：ホバー対象） -->
-        <a href="${item.url}" target="_blank" class="schedule-main">
-            <div class="schedule-time">${item.time}</div>
+            <!-- ▼ 左側（リンク部分） -->
+            <a href="${item.url}" target="_blank" class="schedule-main">
+                <div class="schedule-time">${item.time}</div>
 
+                ${
+                    item.thumbnail
+                        ? `<img src="${item.thumbnail}" class="schedule-thumb">`
+                        : ""
+                }
+
+                <!-- ▼ タイトルを必ず表示 -->
+                <div class="schedule-title" title="${item.title || ""}">
+                    ${item.title || ""}
+                </div>
+            </a>
+
+            <!-- ▼ 右側（削除ボタン） -->
             ${
-                item.thumbnail
-                    ? `<img src="${item.thumbnail}" class="schedule-thumb">`
+                IS_ADMIN
+                    ? `<button class="side-delete" data-id="${item.id}">×</button>`
                     : ""
             }
 
-            ${
-                item.title
-                    ? `<div class="schedule-title">${item.title}</div>`
-                    : ""
-            }
-        </a>
-
-        <!-- ▼ 右側（削除ボタン） -->
-        ${
-            IS_ADMIN
-                ? `<button class="side-delete" data-id="${item.id}">×</button>`
-                : ""
-        }
-
-    </div>
-`;
-
+        </div>
+        `;
 
         container.appendChild(wrapper);
 
-        // ▼ 削除ボタンのクリックを確実にリンクから分離
+        // ▼ 削除ボタン（リンクに吸われない）
         if (IS_ADMIN) {
             const btn = wrapper.querySelector(".side-delete");
             btn.addEventListener("click", (e) => {
-                e.stopPropagation();   // ← リンクに吸われない（決定打）
+                e.stopPropagation();
                 deleteSchedule(item.id);
             });
         }
@@ -152,7 +152,7 @@ async function addSchedule() {
         const data = await res.json();
 
         if (data.video_id) videoId = data.video_id;
-        if (data.title) title = data.title;
+        if (data.title) title = data.title;   // ← タイトル取得
     } catch {}
 
     if (videoId) {
@@ -178,7 +178,7 @@ async function addSchedule() {
 }
 
 // ===============================
-// ▼ 削除（POST /api/schedule/delete）
+// ▼ 削除
 // ===============================
 async function deleteSchedule(id) {
     const res = await fetch("/api/schedule/delete", {
@@ -195,6 +195,22 @@ async function deleteSchedule(id) {
     await loadSchedules();
     renderWeekList();
 }
+
+// ===============================
+// ▼ 日付クリック → 入力欄に反映
+// ===============================
+document.addEventListener("click", (e) => {
+    const card = e.target.closest(".day-card");
+    if (!card) return;
+
+    const date = card.dataset.date;
+    const input = document.getElementById("dateInput");
+    if (input) input.value = date;
+
+    // ハイライト
+    document.querySelectorAll(".day-card").forEach(c => c.classList.remove("selected"));
+    card.classList.add("selected");
+});
 
 // ===============================
 // ▼ 初期表示
@@ -219,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ===== マウスカーソル位置デバッグ =====
 document.addEventListener("mousemove", (e) => {
     const box = document.getElementById("mouse-debug");
-    if (!box) return; // admin じゃないときは何もしない
+    if (!box) return;
 
     const x = e.clientX;
     const y = e.clientY;

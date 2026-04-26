@@ -1,3 +1,4 @@
+# ▼ schedule.py
 from flask import Blueprint, request, jsonify, session
 from .database import get_db
 
@@ -26,19 +27,26 @@ def api_list_schedule():
     return jsonify(result)
 
 
+
 # ▼ スケジュール追加（管理者だけOK）
 @bp.route("/api/schedule/add", methods=["POST"])
 def api_add_schedule():
 
-    # ★ 管理者チェック（追加）
     if not session.get("admin"):
         return jsonify({"error": "not_admin"}), 403
 
     data = request.json
+    time = data["time"]
+
+    # ★ 30分刻みチェック
+    hh, mm = time.split(":")
+    if mm not in ["00", "30"]:
+        return jsonify({"error": "invalid_time"}), 400
+
     conn = get_db()
     conn.execute(
         "INSERT INTO schedules (date, time, url, title, thumbnail) VALUES (?, ?, ?, ?, ?)",
-        (data["date"], data["time"], data["url"], data.get("title"), data.get("thumbnail"))
+        (data["date"], time, data["url"], data.get("title"), data.get("thumbnail"))
     )
     conn.commit()
     conn.close()
