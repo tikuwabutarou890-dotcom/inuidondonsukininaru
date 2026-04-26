@@ -3,7 +3,7 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 
-def create_app():
+def create_app(config=None):
     load_dotenv()
 
     app = Flask(__name__)
@@ -22,4 +22,5 @@ def create_app():
     app.register_blueprint(schedule_bp)
 
     return app
+
 
