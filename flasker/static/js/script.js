@@ -76,7 +76,7 @@ function renderWeekList() {
 }
 
 // ===============================
-// ▼ 1日のスケジュール描画（時間位置修正済み）
+// ▼ 1日のスケジュール描画（時計バグ完全修正版）
 // ===============================
 function renderDaySchedules(dateKey) {
     const container = document.getElementById(`day-${dateKey}`);
@@ -89,32 +89,33 @@ function renderDaySchedules(dateKey) {
     schedules[dateKey].forEach(item => {
         const wrapper = document.createElement("div");
 
-       wrapper.innerHTML = `
+        wrapper.innerHTML = `
         <div class="schedule-card">
 
-     <div class="schedule-time">${item.time}</div>
+            <!-- ★ 時計は a の外に出す（これが重要） -->
+            <div class="schedule-time">${item.time}</div>
 
-        <a href="${item.url}" target="_blank" class="schedule-main">
+            <a href="${item.url}" target="_blank" class="schedule-main">
 
-        ${
-            item.thumbnail
-                ? `<img src="${item.thumbnail}" class="schedule-thumb">`
-                : ""
-        }
+                ${
+                    item.thumbnail
+                        ? `<img src="${item.thumbnail}" class="schedule-thumb">`
+                        : ""
+                }
 
-        <div class="schedule-title" title="${item.title || ""}">
-            ${item.title || ""}
+                <div class="schedule-title" title="${item.title || ""}">
+                    ${item.title || ""}
+                </div>
+            </a>
+
+            ${
+                IS_ADMIN
+                    ? `<button class="side-delete" data-id="${item.id}">×</button>`
+                    : ""
+            }
+
         </div>
-    </a>
-
-    ${
-        IS_ADMIN
-            ? `<button class="side-delete" data-id="${item.id}">×</button>`
-            : ""
-    }
-
-</div>
-`;
+        `;
 
         container.appendChild(wrapper);
 
