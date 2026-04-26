@@ -2,51 +2,53 @@
 from flask import Blueprint, request, jsonify, session
 from .database import get_db
 
-bp = Blueprint("schedule", __name__)
+# ▼ Blueprint（必ず url_prefix を付ける）
+bp = Blueprint("schedule", __name__, url_prefix="/schedule")
+
+# ▼ スケジュール一覧（カード表示に必須）
+@bp.route("/list")
+def api_list_schedule():
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT id, date, time, url, title, thumbnail FROM schedules ORDER BY date, time"
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
 
 # ▼ スケジュール追加（管理者だけOK）
-@bp.route("/api/schedule/add", methods=["POST"])
+@bp.route("/add", methods=["POST"])
 def api_add_schedule():
 
     if not session.get("admin"):
         return jsonify({"error": "not_admin"}), 403
 
     data = request.json
-    date = data["date"]
-    time = data["time"]
-    url = data["url"]
+
+    # ▼ 必須項目
+    date = data.get("date")
+    time = data.get("time")
+    url = data.get("url")
+
+    if not date or not time or not url:
+        return jsonify({"error": "missing_fields"}), 400
+
+    # ▼ 秒付き "12:00:00" → "12:00" に変換
+    parts = time.split(":")
+    if len(parts) >= 2:
+        hh = parts[0]
+        mm = parts[1]
+        time = f"{hh}:{mm}"
+    else:
+        return jsonify({"error": "invalid_time"}), 400
 
     # ★ 30分刻みチェック
-    hh, mm = time.split(":")
     if mm not in ["00", "30"]:
         return jsonify({"error": "invalid_time"}), 400
 
-    # ▼ /live/xxxx → watch?v=xxxx に変換
-    fixed_url = url
-    if "/live/" in url:
-        try:
-            video_id = url.split("/live/")[1].split("?")[0]
-            fixed_url = f"https://www.youtube.com/watch?v={video_id}"
-        except:
-            pass
-
-    # ▼ タイトル取得（サーバー側なら CORS なし）
-    title = None
-    try:
-        import requests
-        oembed = f"https://www.youtube.com/oembed?url={fixed_url}&format=json"
-        data_oembed = requests.get(oembed).json()
-        title = data_oembed.get("title")
-    except:
-        title = None
-
-    # ▼ サムネイル生成
-    thumbnail = None
-    try:
-        video_id = fixed_url.split("v=")[1]
-        thumbnail = f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
-    except:
-        pass
+    # ▼ script.js から送られてくる title / thumbnail をそのまま使う
+    title = data.get("title") or ""
+    thumbnail = data.get("thumbnail") or ""
 
     # ▼ DB 保存
     conn = get_db()
@@ -61,15 +63,21 @@ def api_add_schedule():
 
 
 # ▼ スケジュール削除（管理者だけOK）
-@bp.route("/api/schedule/delete", methods=["POST"])
+@bp.route("/delete", methods=["POST"])
 def api_delete_schedule():
 
     if not session.get("admin"):
         return jsonify({"error": "not_admin"}), 403
 
     data = request.json
+    schedule_id = data.get("id")
+
+    if not schedule_id:
+        return jsonify({"error": "missing_id"}), 400
+
     conn = get_db()
-    conn.execute("DELETE FROM schedules WHERE id = ?", (data["id"],))
+    conn.execute("DELETE FROM schedules WHERE id = ?", (schedule_id,))
     conn.commit()
     conn.close()
+
     return jsonify({"status": "ok"})

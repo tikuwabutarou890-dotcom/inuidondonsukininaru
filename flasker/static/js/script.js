@@ -22,8 +22,14 @@ function extractYouTubeId(url) {
 let schedules = {};
 
 async function loadSchedules() {
-    const res = await fetch("/api/schedule/list");
-    schedules = await res.json();
+    const res = await fetch("/schedule/list");
+    const list = await res.json();
+
+    schedules = {};
+    list.forEach(item => {
+        if (!schedules[item.date]) schedules[item.date] = [];
+        schedules[item.date].push(item);
+    });
 }
 
 // ===============================
@@ -56,7 +62,7 @@ function renderWeekList() {
 
         const card = document.createElement("div");
         card.className = "day-card";
-        card.dataset.date = dateKey;   // ← 日付クリック用
+        card.dataset.date = dateKey;
 
         card.innerHTML = `
             <h3>${d.getMonth() + 1}/${d.getDate()}</h3>
@@ -70,7 +76,7 @@ function renderWeekList() {
 }
 
 // ===============================
-// ▼ 1日のスケジュール描画（タイトル必ず表示版）
+// ▼ 1日のスケジュール描画（時間位置修正済み）
 // ===============================
 function renderDaySchedules(dateKey) {
     const container = document.getElementById(`day-${dateKey}`);
@@ -83,38 +89,35 @@ function renderDaySchedules(dateKey) {
     schedules[dateKey].forEach(item => {
         const wrapper = document.createElement("div");
 
-        wrapper.innerHTML = `
+       wrapper.innerHTML = `
         <div class="schedule-card">
 
-            <!-- ▼ 左側（リンク部分） -->
-            <a href="${item.url}" target="_blank" class="schedule-main">
-                <div class="schedule-time">${item.time}</div>
+     <div class="schedule-time">${item.time}</div>
 
-                ${
-                    item.thumbnail
-                        ? `<img src="${item.thumbnail}" class="schedule-thumb">`
-                        : ""
-                }
+        <a href="${item.url}" target="_blank" class="schedule-main">
 
-                <!-- ▼ タイトルを必ず表示 -->
-                <div class="schedule-title" title="${item.title || ""}">
-                    ${item.title || ""}
-                </div>
-            </a>
+        ${
+            item.thumbnail
+                ? `<img src="${item.thumbnail}" class="schedule-thumb">`
+                : ""
+        }
 
-            <!-- ▼ 右側（削除ボタン） -->
-            ${
-                IS_ADMIN
-                    ? `<button class="side-delete" data-id="${item.id}">×</button>`
-                    : ""
-            }
-
+        <div class="schedule-title" title="${item.title || ""}">
+            ${item.title || ""}
         </div>
-        `;
+    </a>
+
+    ${
+        IS_ADMIN
+            ? `<button class="side-delete" data-id="${item.id}">×</button>`
+            : ""
+    }
+
+</div>
+`;
 
         container.appendChild(wrapper);
 
-        // ▼ 削除ボタン（リンクに吸われない）
         if (IS_ADMIN) {
             const btn = wrapper.querySelector(".side-delete");
             btn.addEventListener("click", (e) => {
@@ -147,7 +150,6 @@ async function addSchedule() {
     let thumbnail = null;
     let title = null;
 
-    // ▼ /live/xxxx → watch?v=xxxx に変換
     let fixedUrl = url;
     if (url.includes("/live/")) {
         const id = extractYouTubeId(url);
@@ -155,10 +157,8 @@ async function addSchedule() {
     }
 
     try {
-        // ▼ YouTube公式 oEmbed API（ライブでもタイトル取れる）
         const res = await fetch(`https://www.youtube.com/oembed?url=${fixedUrl}&format=json`);
         const data = await res.json();
-
         if (data.title) title = data.title;
     } catch (e) {
         console.log("oEmbed error:", e);
@@ -170,7 +170,7 @@ async function addSchedule() {
 
     const payload = { date, time, url, title, thumbnail };
 
-    const res = await fetch("/api/schedule/add", {
+    const res = await fetch("/schedule/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -186,12 +186,11 @@ async function addSchedule() {
     }
 }
 
-
 // ===============================
 // ▼ 削除
 // ===============================
 async function deleteSchedule(id) {
-    const res = await fetch("/api/schedule/delete", {
+    const res = await fetch("/schedule/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id })
@@ -217,7 +216,6 @@ document.addEventListener("click", (e) => {
     const input = document.getElementById("dateInput");
     if (input) input.value = date;
 
-    // ハイライト
     document.querySelectorAll(".day-card").forEach(c => c.classList.remove("selected"));
     card.classList.add("selected");
 });
