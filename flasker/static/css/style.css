@@ -503,3 +503,15 @@ a.link-button:hover {
     height: 42px;
 }
 
+/* 時間30分間隔 */
+.schedule-card {
+    position: relative;
+}
+
+.schedule-time {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none; /* ← これが超重要 */
+}
