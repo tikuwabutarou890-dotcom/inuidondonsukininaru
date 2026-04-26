@@ -20,3 +20,4 @@ COPY README.md .
 
 # create_app() を使うのでこれが正解
 CMD ["/root/.local/bin/gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "flasker:create_app()"]
+
